@@ -1,0 +1,511 @@
+<html>
+	<head>
+		<title>Analysis of Grades</title>
+		<style>
+			body{
+				font-family:Helvetica;
+				font-size:14px;
+			}
+			
+			table{
+				font-size:14px;
+			}
+			
+			#tooltip{
+				position:absolute;
+				top:-1000px;
+				left:-1000px;
+				background:#f2f2f2;
+				z-index:+2;
+				padding:10px;
+				border-radius:10px;
+				max-width:500px;
+			}
+			
+			button{
+				font-size:12px;
+			}
+			
+			.noselect {
+			  -webkit-touch-callout: none; /* iOS Safari */
+				-webkit-user-select: none; /* Safari */
+				 -khtml-user-select: none; /* Konqueror HTML */
+				   -moz-user-select: none; /* Firefox */
+					-ms-user-select: none; /* Internet Explorer/Edge */
+						user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+			}
+			
+			#a_plus_logo{
+				width:100%;
+				max-width:50px;
+				min-width:25px;
+			}
+			
+			.overflow_hidden{
+				overflow:hidden;
+			}
+			
+			label{
+				padding:3px;
+			}
+			
+			.div_button{
+				font-size:13px;
+				background-color:#e6e6e6;
+				border-radius: 7px;
+				width:65px;
+				border: 1px solid;
+				border-color: gray;
+			}
+		</style>		
+	</head>
+	<body>
+		<div id="tooltip">
+		</div>
+		<div id="top_div">
+			<table id="page_header" width="100%">
+				<tbody>
+					<tr>
+						<td width="10%">
+							<img id="a_plus_logo" src="icon.png" alt="IIT logo" />
+						</td>				
+						<td width="40%">
+							<h2>Analysis of Grades</h2>
+						</td>
+						<td width="50%">
+							<!--a style="float:right; padding-right:10px;" href="#disclaimer_header">Disclaimer</a-->
+						</td>					
+					</tr>
+				</tbody>
+			</table>
+			<table id="radio_table" style="padding-top:10px; display:none;">
+				<tbody>
+					<tr>
+						<td style="padding-right:10px; padding-left:10px; font-weight:bold;">
+							View:
+							<select id="view_select" style="display:none;">
+								<option value="one_view">One chart</option>
+								<!--option value="one_column" >Column of charts</option>
+								<option value="circle_packing" disabled >Circle packing</option-->
+							</select>
+						<td>				
+						<td style="padding-right:10px;">
+							<!--of-->
+							<select id="sub_view_select" style="margin-left:10px;">
+								<option value="grades_view">Grades</option>
+								<option value="cg_view">CG/SG</option>
+								<option id="cg_by_batch" value="cg_by_batch_view">CG by batch year</option>
+								<!--option value="grades_trend_view" disabled >Grades trend</option>
+								<option value="cg_trend_view" disabled >SG trend</option-->
+							</select>
+						<td>
+						<td style="padding-right:10px; display:none;" id="column_options_td">
+							by
+							<select id="col_sub_view_select" style="margin-left:10px;">
+								<option id="stud_dep_option" value="col_stud_dep">Students' Department</option>
+								<option id="col_course_dep_option" value="col_course_dep">Courses' Department</option>
+								<option id="col_course_option" value="col_course">Courses</option>
+								<!--option value="grades_trend_view" disabled >Grades trend</option>
+								<option value="cg_trend_view" disabled >SG trend</option-->
+							</select>
+						<td>
+						<td id="comparison_check_td" style="border-left:1px solid; display:none;">
+							<input type="checkbox" id="comparison_check"/> Do comparison
+						<td>
+						<td style="padding-right:10px; display:none">
+							Based on:
+							<select id="comparison_base_select">
+								<option value="gender">Gender</option>
+								<option value="language">JEE Language</option>
+								<option value="category">Category</option>
+							</select>
+						<td>
+						<td style="padding-right:10px;  display:none">
+							Circle color by:
+							<select id="comparison_base_select">
+								<option value="median">Median</option>
+								<option value="range">Interquartile range</option>
+								<option value="top">Top %</option>
+								<option value="bottom">Bottom %</option>
+							</select>
+						<td>					
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<table width="100%" id="top_table" style="display:none;">
+			<tbody>		
+				<tr>
+					<td valign="top">					
+						<div id="svg_chart_container">
+							<svg id="svg_chart"></svg>
+						</div>					
+					</td>				
+					<td valign="top" style="border-left:1px solid;">
+						<div id="filters_div">
+							<table>
+								<tbody>
+									<tr>
+										<td>
+											<div style="width:325px;">
+												<div>
+													<div style="padding-left:5px; padding-bottom:5px;">
+														<span style="font-weight:bold;">Students</span>
+													</div>
+													<div id="students_div" style="padding-left:3px; margin-top:5px; padding-top:5px;">
+														<table>
+															<tbody>
+																<tr>
+																	<td>Batch</td>
+																	<td colspan="2">
+																		<input id="lower_batch_year" type="number" style="width:50px;"/>
+																		to
+																		<input id="upper_batch_year" type="number" style="width:50px;"/>
+																	</td>
+																</tr>
+																<tr>
+																	<td>Gender</td>
+																	<td>
+																		<select id="students_gender_sel" style="width:110px;">
+																			<option value="both">Both</option>
+																			<option value="M">Male</option>
+																			<option value="F">Female</option>
+																		</select>
+																	</td>
+																</tr>
+																<tr>
+																	<td>Department</td>
+																	<td>
+																		<select id="students_dep_sel" style="width:110px;"></select>
+																	</td>
+																	<td style="color:red; display:none;" id="students_dep_not_check_td">
+																		<input id="students_dep_not_check" type="checkbox" />!
+																	</td>
+																</tr>
+																<tr>
+																	<td>City</td>
+																	<td>
+																		<select id="students_city_sel" style="width:110px;"></select>
+																	</td>
+																	<td style="color:red; display:none;" id="students_city_not_check_td">
+																		<input id="students_city_not_check" type="checkbox" />!
+																	</td>
+																</tr>
+																<tr>
+																	<td>JEE Lang</td>
+																	<td>
+																		<select id="students_jee_sel" style="width:110px;"></select>
+																	</td>
+																	<td style="color:red;display:none;" id="students_jee_not_check_td">
+																		<input id="students_jee_not_check" type="checkbox" />!
+																	</td>
+																</tr>
+																<tr>
+																	<td>Program</td>
+																	<td>
+																		<select id="students_prog_sel" style="width:110px;"></select>
+																	</td>
+																	<td style="color:red;display:none;" id="students_prog_not_check_td">
+																		<input id="students_prog_not_check" type="checkbox" />!
+																	</td>
+																</tr>
+																<tr>
+																	<td>Category</td>
+																	<td>
+																		<select id="students_cat_sel" style="width:110px;"></select>
+																	</td>
+																	<td style="color:red;display:none;" id="students_cat_not_check_td">
+																		<input id="students_cat_not_check" type="checkbox" />!
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</div>
+												</div>
+												<div style="border-top:1px solid;">
+													<div style="padding-left:5px; padding-top:15px; padding-bottom:5px;">
+														<span style="font-weight:bold;">Courses</span>
+													</div>
+													<table>
+														<tbody>
+															<tr>
+																<td>
+																	Year
+																</td>
+																<td colspan="2">
+																<input id="lower_course_year" type="number" style="width:50px;"/>
+																to
+																<input id="upper_course_year" type="number" style="width:50px;"/>
+																</td>
+															</tr>
+															<tr>
+																<td>
+																Semester
+																</td>
+																<td>
+																	<select id="courses_semester_sel" style="width:110px;">
+																		<option value="0">Either</option>
+																		<option value="1">Spring</option>
+																		<option value="2">Autumn</option>
+																	</select>
+																</td>
+																<td>
+																</td>
+															</tr>
+															<tr>
+																<td>
+																	Department
+																</td>
+																<td>
+																	<select id="courses_dep_sel" style="width:110px;"></select>
+																</td>
+																<td style="color:red;display:none;" id="courses_dep_not_check_td">
+																	<input id="courses_dep_not_check" type="checkbox" />!
+																</td>
+															</tr>
+															<tr>
+																<td>
+																Course
+																</td>
+																<td>
+																	<select id="courses_course_sel" style="width:110px;"></select>
+																</td>
+																<td style="color:red;display:none;" id="courses_course_not_check_td">
+																	<input id="courses_course_not_check" type="checkbox" />!
+																</td>
+															</tr>
+														</tbody>
+													</table>
+												</div>
+												<div id="top_grades_div" style="border-top:1px solid; padding-top:15px;">
+													<table>
+														<tbody>
+															<tr>
+																<td>
+																	Top grades:
+																</td>
+																<td>
+																	>=
+																</td>
+																<td>
+																	<select id="top_grades_sel">
+																	</select>
+																</td>
+															</tr>
+															<tr>
+																<td>
+																	Low grades:
+																</td>
+																<td>
+																	<=
+																</td>
+																<td>
+																	<select id="low_grades_sel">
+																	</select>
+																</td>
+															</tr>
+														</tbody>
+													</table>
+												</div>
+												<div id="top_cgs_div" style="border-top:1px solid; padding-top:15px; display:none;">
+													<table>
+														<tbody>
+															<tr>
+																<td>
+																	Top CG/SG:
+																</td>
+																<td>
+																	>=
+																</td>
+																<td>
+																	<select id="top_cg_sel">
+																	</select>
+																</td>
+															</tr>
+															<tr>
+																<td>
+																	Low CG/SG:
+																</td>
+																<td>
+																	<
+																</td>
+																<td>
+																	<select id="low_cg_sel">
+																	</select>
+																</td>
+															</tr>
+														</tbody>
+													</table>
+												</div>
+											</div>										
+										</td>									
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</td>
+				</tr>				
+			</tbody>
+		</table>
+		<div id="details_div" style="display:none;">
+			<div id="details_table_options" style="padding-top:10px;">
+				<div>
+					<table style="width:100%;">
+						<tbody>
+							<tr>
+								<td style="width:80%; font-weight:bold;" id="details_heading_td">Details</td>
+								<td style="width:10%;"><button id="export_button">Export as CSV</button></td>
+								<td style="width:10%; text-align:right; font-weight:bold;"><a href="#top_div">Go up</a></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div>
+					<table style="width:100%;">
+						<tbody>
+							<tr>
+								<td style="width:33%;"></td>
+								<td style="width:33%; text-align:center;">Showing: <span id="num_span"></span></td>
+								<td style="width:33%; text-align:right;">
+									<span>Page size:</span>
+									<select id="page_size_sel">
+										<option value="10">10</option>
+										<option value="25">25</option>
+										<option selected value="50">50</option>
+										<option value="100">100</option>
+										<option value="200">200</option>
+									</select>
+									<button id="prev_button">Prev.</button>
+									<button id="next_button">Next</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div id="details_header_div">
+				<table id="details_header_table" style="table-layout:fixed;">
+					<tbody>
+						<tr id="details_header_row" style="background-color: #00264d; color:white; font-weight:bold;">
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div id="details_table_div">
+				<div id="details_table_container" style="overflow-y:scroll;">
+					<table id="details_table" style="table-layout:fixed;">
+						<tbody id="details_table_body">
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div id="file_upload_div" style="width:100%; height:100%;">
+			<div style="margin:auto; width:80%; height:80%;">
+				<p>Specify the following files:</p>
+				<table>
+					<tbody>
+						<tr style="vertical-align:top;">
+							<td>Departments</td>
+							<td style="padding-left:20px;">This file should have the columns: 
+								<ol>
+									<li>Code</li>
+									<li>Name</li>
+								</ol>
+							</td>
+							<td style="padding-left:10px;">
+								<div class="div_button">
+									<input type="file" id="dep_file" style="display:none;" accept=".csv"/>
+									<label for="dep_file">Select file</label>
+								</div>
+							</td>
+							<td id="selected_dep_file">
+							</td>
+						</tr>
+						<tr style="vertical-align:top;">
+							<td>Courses</td>
+							<td style="padding-left:20px;">This file should have the columns:
+								<ol>
+									<li>Department Code</li>
+									<li>Course Code</li>
+									<li>Name</li>
+									<li>Credits</li>
+								</ol>
+							</td>
+							<td style="padding-left:10px;">
+								<div class="div_button">
+									<input type="file" id="course_file" style="display:none;" accept=".csv"/>
+									<label for="course_file">Select file</label>
+								</div>
+							</td>
+							<td id="selected_course_file">
+							</td>
+						</tr>
+						<tr style="vertical-align:top;">
+							<td>Students</td>
+							<td style="padding-left:20px;">This file should have the columns:
+								<ol>
+									<li>Roll Number</li>
+									<li>Name</li>
+									<li>Gender</li>
+									<li>Department Code</li>
+									<li>City</li>
+									<li>JEE Language</li>
+									<li>Category</li>
+									<li>Program</li>
+								</ol>
+							</td>
+							<td style="padding-left:10px;">
+								<div class="div_button">
+									<input type="file" id="student_file" style="display:none;" accept=".csv"/>
+									<label for="student_file">Select file</label>
+								</div>
+							</td>
+							<td id="selected_student_file">
+							</td>
+						</tr>
+						<tr style="vertical-align:top;">
+							<td>Grades</td>
+							<td style="padding-left:20px;">This file should have the columns:
+								<ol>
+									<li>Roll Number</li>
+									<li>Course Code</li>
+									<li>Year</li>
+									<li>Semester</li>
+									<li>Grade</li>
+								</ol>
+							</td>
+							<td style="padding-left:10px;">
+								<div class="div_button">
+									<input type="file" id="grade_file" style="display:none;" accept=".csv"/>
+									<label for="grade_file">Select file</label>
+								</div>
+							</td>
+							<td id="selected_grade_file">
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<div style="text-align:center;">
+					<button disabled id="load_file_button">Load selected files</button>
+					<button  id="load_sample_button">Load sample data</button>
+				</div>
+			</div>
+		</div>
+		<div id="footer" style="width:100%;">
+			<table width="100%">
+				<tbody>
+					<tr>
+						<td width="90%">
+						</td>				
+						<td width="10%" style="text-align:right;">
+							<p>&copy; 2019</p>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<script src="Resources/d3-v4.js"></script>
+		<script src="Resources/a_plus_grades_analyzer.js"></script>
+	</body>
+</html>
