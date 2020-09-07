@@ -14,7 +14,7 @@ Analyze grades of students
 
 <h2 id="head1"> Description of the project </h2>
 
-Helps in analyzing grades of students. Users can slice and dice the grades data by different parameters (gender, department, etc.) to understand relationship between parameters and grades. It further helps in identifying courses where grades have not been awarded properly (e.g. alotting a grade on C to every students). Identifying such relationships and anamolies can help academic offices take corrective actions.
+Helps in analyzing grades of students. Users can slice and dice the grades data by different parameters (gender, department, etc.) to understand relationship between parameters and grades. It further helps in identifying courses where grades have not been awarded properly (e.g. allotting a grade on C to every students). Identifying such relationships and anamolies can help academic offices take corrective actions.
 
 Students names, grades and other details have been randomly generated for sample data. Course names have been taken from IIT Kharagpur courses page for different deparments. For e.g. AE (AEROSPACE ENGINEERING) courses are available [here](https://erp.iitkgp.ac.in/ERPWebServices/curricula/CurriculaSubjectsList.jsp?stuType=UG&splCode=AE).
 
